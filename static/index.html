@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Title Goes Here</title>
+        <!-- JQuery -->
+        <script type="text/javascript" src="jquery-1.11.1.min.js"></script>
+        <!-- Bootstrap -->
+        <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-theme.min.css"/>
+        <!-- JQuery UI -->
+        <script type="text/javascript" src="jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="jquery-ui.css">
+        <!-- My stylesheet -->
+        <link rel="stylesheet" type="text/css" href="stylesheet.css">
+        <!-- jVectorMap -->
+        <link rel="stylesheet" type="text/css" href="jvectormap.css">
+    </head>
+    <body style="margin: 0px; overflow: hidden;">
+        <div id="display-time">Hi</div>
+        <div id="map" style="height: 100vh"></div>
+        <div id="title">
+            StatExaminator9000
+        </div>
+        <div id="controls">
+            <center>
+                <span class="glyphicon clickable glyphicon-backward" data-name="back"></span>
+                <span class="glyphicon clickable glyphicon-forward" data-name="forward"></span>
+            </center>
+            <div id="map-selector">
+                <select id="map-select"></select>
+            </div>
+            <div id="type-selector">
+                <input type="radio" name="mapview" value="Cities" id="city-mapmode" class="mapmode-selector"/> Cities<br/>
+                <input type="radio" name="mapview" value="Political" id="political-mapmode" class="mapmode-selector" checked/> Countries
+            </div>
+            <center>
+                <span id="speed">60</span>
+                <span class="glyphicon clickable glyphicon-plus-sign" data-name="faster"></span>
+                <span class="glyphicon clickable glyphicon-minus-sign" data-name="slower"></span>
+            </center>
+        </div>
+        <script type="text/javascript" src="jvectormap.js"></script>
+        <script type="text/javascript" src="countries/US.js"></script>
+        <script type="text/javascript" src="countries/world.js"></script>
+
+        <script type="text/javascript" src="maps/US.js"></script>
+        <script type="text/javascript" src="maps/world.js"></script>
+
+        <script type="text/javascript" src="fetch.js"></script>
+        <script type="text/javascript" src="script.js"></script>
+    </body>
+</html>

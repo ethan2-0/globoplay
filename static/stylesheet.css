@@ -1,0 +1,82 @@
+@font-face {
+    font-family: 'Open Sans Light';
+    src: url('fonts/OpenSans-Light-webfont.eot?#iefix') format('embedded-opentype'), url('fonts/OpenSans-Light-webfont.woff') format('woff'), url('fonts/OpenSans-Light-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal
+}
+@font-face {
+    font-family: 'Open Sans';
+    src: url('/media/fonts/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'), url('/media/fonts/OpenSans-Regular-webfont.woff') format('woff'), url('/media/fonts/OpenSans-Regular-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal
+}
+#display-time {
+    top: 10px;
+    right: 10px;
+}
+#title {
+    top: 10px;
+    left: 10px;
+}
+#display-time, #title {
+    position: absolute;
+    color: black;
+    z-index: 100000000000;
+    font-size: 26px;
+    background-color: white;
+    box-shadow: 0px 0px 1px 1px #EEE;
+    padding: 5px;
+    font-family: "Open Sans Light";
+    transition: opacity 0.4s, filter 0.4s;
+    cursor: default;
+}
+#display-time:hover, #title:hover {
+    opacity: 0.3;
+    filter: blur(6px);
+}
+#controls {
+    position: absolute;
+    bottom: 10px;
+    width: 100vw;
+    padding-left: 10px;
+    padding-right: 10px;
+    z-index: 100000000000;
+    font-size: 20px;
+}
+#speed:before {
+    content: "Steps/hour (60 is realtime): ";
+}
+.clickable {
+    cursor: pointer;
+}
+#map-selector {
+    position: absolute;
+    left: 10px;
+    bottom: 0px;
+}
+#map-selector:before {
+    content: "Select a map: ";
+}
+#type-selector {
+    position: absolute;
+    right: 10px;
+    bottom: 0px;
+}
+.city {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 100%;
+    background-color: black;
+    transition: opacity 0.4s, filter 0.4s, width 0.4s, height 0.4s, left 0.4s, top 0.4s;
+    filter: none;
+    opacity: 1;
+    z-index: 100000;
+}
+.city:hover {
+    filter: blur(2px);
+    opacity: 0.8;
+}
+.jvectormap-zoomin, .jvectormap-zoomout {
+    display: none;
+}
