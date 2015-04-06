@@ -1,4 +1,3 @@
-//$("#map-select")[0].selectedIndex
 $("#map-select").on("change", function() {
     location.href = "index.html?map=" + $("#map-select")[0].selectedIndex;
 });

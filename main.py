@@ -46,8 +46,10 @@ def getBetween(mapName, time1, time2):
         return Response(json.dumps(data), mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
-
+def getFlaskApp():
+    return app
 def begin():
-    app.run(debug=True)
+    app.debug = True
+    app.run(host="0.0.0.0")
 if __name__ == "__main__":
     begin()
