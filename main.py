@@ -66,31 +66,28 @@ class DynamoDBDataGetter:
         }
         for country in self.countries:
             data["countries"][country] = 0
-        logging.info("Getting rows {0}".format(data["countries"]))
         iterator = self.table.scan()
-        logging.info("Getting countries {0}".format(self.countries))
         for item in iterator:
             logging.info("Row: {0}".format(item))
             for key in item.keys():
                 if key == 'ts':
                     continue
                 name = self.prefix + '-' + key if not self.prefix is None else key
-                logging.info("Name {0}".format(name))
                 if not name in self.countries:
                     continue
                 data["countries"][name] = float(item[key])
-                logging.info("{0}: {1}".format(name, int(item[key])))
-        logging.info("Got rows 1 {0}".format(data["countries"]))
+        maxval = 0
         for country in data["countries"].keys():
-            if country == 'QA' or country == 'KW' or country == 'TT' or country == 'BN':
-                data["countries"][country] = 0.0
-            elif country in self.countries_by_pop:
-                data["countries"][country] = data["countries"][country] / self.countries_by_pop[country]
-            else:
-                logging.info("Bad!!!! {0}".format(country))
-                data["countries"][country] = data["countries"][country]
+            if country == 'US':
+                maxval= data["countries"][country] / self.countries_by_pop[country]
 
-        logging.info("Got rows 2 {0}".format(data["countries"]))
+        for country in data["countries"].keys():
+            if country in self.countries_by_pop:
+                data["countries"][country] = data["countries"][country] / self.countries_by_pop[country]
+                if data["countries"][country] > maxval:
+                    data["countries"][country] = maxval
+            else:
+                data["countries"][country] = 0
 
         return data
 
