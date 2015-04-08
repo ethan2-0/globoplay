@@ -61,9 +61,6 @@ function shadeColor(color, percent) {
 }
 var map = $("#map");
 var lastMouseMove = null;
-function onRegionTipShow(e, tip, code) {
-    // console.log(e, tip, code);
-}
 function updateTimeDisplay() {
     $("#display-time").html(prettyPrintMinutestamp(time));
 }
@@ -226,7 +223,15 @@ function reload() {
             }]
         },
         zoomMax: 1,
-        onRegionTipShow: onRegionTipShow
+        onRegionTipShow: function(e, tip, code) {
+            console.log("Showing tooltip for " + code, tip);
+            $("#traffic").html(data[code]);
+            $("#info-title").html(tip.html());
+            $("#info").show();
+        },
+        onRegionOut: function() {
+            $("#info").hide();
+        }
     });
     mapObj = blah;
     map.remove();

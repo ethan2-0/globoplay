@@ -18,7 +18,7 @@
     top: 10px;
     left: 10px;
 }
-#display-time, #title {
+#display-time, #title, #info {
     position: absolute;
     color: black;
     z-index: 100000000000;
@@ -30,7 +30,7 @@
     transition: opacity 0.4s, filter 0.4s;
     cursor: default;
 }
-#display-time:hover, #title:hover {
+#display-time:hover, #title:hover, #info:hover {
     opacity: 0.3;
     filter: blur(6px);
 }
@@ -79,4 +79,24 @@
 }
 .jvectormap-zoomin, .jvectormap-zoomout {
     display: none;
+}
+#info {
+    left: 10px;
+    bottom: 50px;
+    z-index: 1000000000;
+    padding: 10px;
+    font-size: 18px;
+}
+.info-table>*:first-child {
+    text-align: right;
+    padding-right: 6px;
+    color: rgb(105, 105, 105);
+}
+#info-title {
+    font-size: 22px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #EEE;
+}
+#info-title:before {
+    content: "Info for ";
 }
