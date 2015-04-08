@@ -203,6 +203,8 @@ $(".mapmode-selector").on("change", function() {
 setInterval(updateClickables, 100);
 var time = Math.floor(dateToMinutestamp(new Date())) - 1;
 var mapObj = null;
+norms = ["polynomial", "linear", "log"];
+var normFunc = 0;
 function reload() {
     $(".jvectormap-tip").remove();
     var newMap = $("<div>").appendTo($(document.body)).css("height", "100vh");
@@ -219,12 +221,11 @@ function reload() {
             regions: [{
                 values: getMapmode() == "political" ? data : maps[map],
                 scale: ['#F7F7F7', '#505050'],
-                normalizeFunction: "linear"
+                normalizeFunction: norms[normFunc]
             }]
         },
         zoomMax: 1,
         onRegionTipShow: function(e, tip, code) {
-            console.log("Showing tooltip for " + code, tip);
             $("#traffic").html(data[code]);
             $("#info-title").html(tip.html());
             $("#info").show();
@@ -255,3 +256,7 @@ function updateSpeedInterval() {
     $("#speed").html(speed);
 }
 updateSpeedInterval();
+function updateNorm() {
+    normFunc = $("#normSelect")[0].selectedIndex;
+    reload();
+}

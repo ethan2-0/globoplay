@@ -1254,6 +1254,10 @@ jvm.NumericScale.prototype = {
       this.normalize = function(value) {
         return Math.pow(value, 0.2);
       }
+    } else if(f === 'log') {
+      this.normalize = function(value) {
+        return Math.log(value);
+      }
     } else if (f === 'linear') {
       delete this.normalize;
     } else {

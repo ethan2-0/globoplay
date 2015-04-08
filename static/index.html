@@ -22,6 +22,21 @@
         <div id="title">
             StatExaminator9000
         </div>
+        <div id="settings-dialog" title="Settings">
+            Normalization function:
+            <select onchange="updateNorm()" id="normSelect">
+                <option>Polynomial</option>
+                <option>Linear</option>
+                <option>Logarithmic</option>
+            </select>
+        </div>
+        <script type="text/javascript">
+            $("#settings-dialog").dialog({
+                width: 600,
+                height: 300
+            }).dialog("close");
+            $("#normSelect")[0].selectedIndex = 0;
+        </script>
         <div id="controls">
             <center>
                 <span class="glyphicon clickable glyphicon-backward" data-name="back"></span>
@@ -35,6 +50,7 @@
                 <input type="radio" name="mapview" value="Political" id="political-mapmode" class="mapmode-selector" checked/> Countries
             </div>
             <center>
+                <span class="link" id="settings-button" onclick="$('#settings-dialog').dialog('open')">Settings</span>
                 <span id="speed">60</span>
                 <span class="glyphicon clickable glyphicon-plus-sign" data-name="faster"></span>
                 <span class="glyphicon clickable glyphicon-minus-sign" data-name="slower"></span>

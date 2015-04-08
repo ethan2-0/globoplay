@@ -100,3 +100,7 @@
 #info-title:before {
     content: "Info for ";
 }
+.link {
+    text-decoration: underline;
+    cursor: pointer;
+}
