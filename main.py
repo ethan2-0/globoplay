@@ -76,7 +76,7 @@ class DynamoDBDataGetter:
                 if not name in self.countries:
                     continue
                 data["countries"][name] = 100000.0 * float(item[key])
-        maxval = 0
+        maxval = 1000000
         for country in data["countries"].keys():
             if country == 'US':
                 maxval= data["countries"][country] / self.countries_by_pop[country]
