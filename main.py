@@ -19,7 +19,7 @@ if 'dynamodb' in os.environ:
     ddb_conn = dynamodb2.connect_to_region(os.environ['aws_region'])
     countries_table = Table(table_name=os.environ['countries_table'],
                       connection=ddb_conn)
-    states_table = Table(table_nameos.environ['states_table'],
+    states_table = Table(table_name=os.environ['states_table'],
                       connection=ddb_conn)
 
 class DataGetter:
@@ -78,17 +78,17 @@ class DynamoDBDataGetter:
                 logging.info("Name {0}".format(name))
                 if not name in self.countries:
                     continue
-                data["countries"][name] = 100000 * float(item[key])
+                data["countries"][name] = float(item[key])
                 logging.info("{0}: {1}".format(name, int(item[key])))
         logging.info("Got rows 1 {0}".format(data["countries"]))
         for country in data["countries"].keys():
             if country == 'QA' or country == 'KW' or country == 'TT' or country == 'BN':
                 data["countries"][country] = 0.0
             elif country in self.countries_by_pop:
-                data["countries"][country] = 1000.0 * data["countries"][country] / self.countries_by_pop[country]
+                data["countries"][country] = data["countries"][country] / self.countries_by_pop[country]
             else:
                 logging.info("Bad!!!! {0}".format(country))
-                data["countries"][country] = 1000.0 * data["countries"][country]
+                data["countries"][country] = data["countries"][country]
 
         logging.info("Got rows 2 {0}".format(data["countries"]))
 
