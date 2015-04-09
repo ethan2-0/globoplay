@@ -15,6 +15,10 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
+exampleHotspotData = ""
+with open("static/hotspot.json") as f:
+    exampleHotspotData = "".join(f.readlines())
+
 if 'dynamodb' in os.environ:
     ddb_conn = dynamodb2.connect_to_region(os.environ['aws_region'])
     count_table = Table(table_name=os.environ['count_table'],
@@ -160,6 +164,9 @@ else:
         "US": DataGetter("US.txt")
     }
     latLongGetter = None
+def getHotspotExample():
+    return exampleHotspotData
+
 
 def getGetter(mapName):
     if not mapName in getters.keys():
@@ -186,7 +193,10 @@ def getBetween(mapName, time1, time2):
 @app.route("/alllatlongs/<mapName>/<int:time1>/<int:time2>")
 def getLatLongsBetween(mapName, time1, time2):
     if latLongGetter is None:
-        return Response(status=404)
+        data = {}
+        for i in xrange(time1, time2):
+            data[i] = json.loads(getHotspotExample())
+        return Response(json.dumps(data), mimetype="application/json")
     try:
         data = {}
         for i in xrange(time1, time2):
@@ -195,10 +205,10 @@ def getLatLongsBetween(mapName, time1, time2):
     except ValueError, e:
         return "%s" % e, 400
 
-@app.route("/latlongs/<mapName>/<int:time>")
+@app.route("/latlong/<mapName>/<int:time>")
 def getLatLongs(mapName, time):
     if latLongGetter is None:
-        return Response(status=404)
+        return Response(getHotspotExample(), mimetype="application/json")
     try:
         data = latLongGetter.getData(time)
         return Response(json.dumps(data), mimetype="application/json")
