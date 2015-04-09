@@ -72,14 +72,18 @@ class DynamoDBDataGetter:
         iterator = count_table.query_2(
             entity__eq=self.entity,
             ts__gte=time_lower,
-            ts__lt=time_upper
+            limit=60
         )
 
         cnt = 0
         for item in iterator:
             cnt += 1
             for key in item.keys():
-                if key == 'ts' or key == 'entity':
+                if key == 'entity':
+                    continue
+                if key == 'ts':
+                    if int(item[key]) > time_upper:
+                        break
                     continue
                 name = self.prefix + '-' + key if not self.prefix is None else key
                 if not name in self.countries:
