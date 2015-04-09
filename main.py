@@ -70,7 +70,7 @@ class DynamoDBDataGetter:
 
             cnt += 1
             for key in item.keys():
-                if key == 'entity' or key == 'ts':
+                if key == 'entity' or key == 'ts' or key == 'scale':
                     continue
                 if self.is_region:
                     if len(key) < 3:
@@ -124,7 +124,7 @@ class DynamoDBLatLongGetter:
 
             cnt += 1
             for key in item.keys():
-                if key == 'entity' or key == 'ts':
+                if key == 'entity' or key == 'ts' or key == 'scale':
                     continue
                 if key in latlongs:
                     latlongs[key] += scale * float(item[key])
