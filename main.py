@@ -34,8 +34,9 @@ class DataGetter:
         return data
 
 class DynamoDBDataGetter:
-    def __init__(self, mapfile, entity, prefix=None):
+    def __init__(self, mapfile, entity, prefix=None, is_region=False):
         self.entity = entity
+        self.is_region = is_region
         self.prefix = prefix
         with open("maps/%s" % mapfile) as f:
             self.countries = {}
@@ -74,7 +75,15 @@ class DynamoDBDataGetter:
             for key in item.keys():
                 if key == 'entity' or key == 'ts':
                     continue
-                name = self.prefix + '-' + key if not self.prefix is None else key
+                if self.is_region:
+                    if len(key) < 3:
+                        name = self.prefix + '-' + key
+                    elif key.startswith(self.prefix):
+                        name = key
+                    else:
+                        continue
+                else:
+                    name = key
                 if not name in self.countries:
                     continue
                 data["countries"][name] = scale * float(item[key])
@@ -124,7 +133,7 @@ class DynamoDBLatLongGetter:
 if 'dynamodb' in os.environ:
     getters = {
         "world": DynamoDBDataGetter("world.txt", 'C'),
-        "US": DynamoDBDataGetter("US.txt", 'S', prefix='US')
+        "US": DynamoDBDataGetter("US.txt", 'S', prefix='US', is_region=True)
     }
     latLongGetter = DynamoDBLatLongGetter()
 else:
