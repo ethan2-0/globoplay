@@ -17,19 +17,13 @@ app = Flask(__name__)
 
 if 'dynamodb' in os.environ:
     ddb_conn = dynamodb2.connect_to_region(os.environ['aws_region'])
-    countries_table = Table(table_name=os.environ['countries_table'],
-                      connection=ddb_conn)
-    states_table = Table(table_name=os.environ['states_table'],
+    count_table = Table(table_name=os.environ['count_table'],
                       connection=ddb_conn)
 
 class DataGetter:
-    countries = "This will be populated in the 'with' statement in __init__."
-    cities = "Same thing for cities."
     def __init__(self, mapfile):
         with open("maps/%s" % mapfile) as f:
             self.countries = [x.replace("\n", "").replace("\r", "") for x in f.readlines()]
-        with open("cities/%s" % mapfile) as f:
-            self.cities = [x.replace("\n", "").replace("\r", "") for x in f.readlines()]
     def getData(self, time):
         data = {
             "countries": {},
@@ -37,70 +31,117 @@ class DataGetter:
         }
         for country in self.countries:
             data["countries"][country] = random.randrange(1000)
-        for city in self.cities:
-            data["cities"][city] = random.randrange(100)
         return data
 
 class DynamoDBDataGetter:
-    countries = "This will be populated in the 'with' statement in __init__."
-    cities = "Same thing for cities."
-    def __init__(self, mapfile, table, prefix=None):
-        self.table = table
+    def __init__(self, mapfile, entity, prefix=None, is_region=False):
+        self.entity = entity
+        self.is_region = is_region
         self.prefix = prefix
-        with open("maps/pop%s" % mapfile) as f:
-            self.countries_by_pop = {}
-            for kvp in [x.split(' ') for x in f.read().splitlines()]:
-                logging.info("kvp: {0} - {1}".format(kvp[0], kvp[1]))
-                self.countries_by_pop[kvp[0]] = float(kvp[1])
         with open("maps/%s" % mapfile) as f:
             self.countries = {}
             for x in f.read().splitlines():
                 self.countries[x] = 1.0
-        with open("cities/%s" % mapfile) as f:
-            self.cities = [x.replace("\n", "").replace("\r", "") for x in f.readlines()]
 
     def getData(self, time):
+        logging.info("get {1} data for time {0}".format(time, self.entity))
         data = {
             "countries": {},
             "cities": {}
         }
         for country in self.countries:
             data["countries"][country] = 0
-        iterator = self.table.scan()
+
+        time_lower = time * 60000
+        time_upper = (time + 1) * 60000
+        logging.info("Fetching data over {0} to {1}".format(time_lower, time_upper))
+        iterator = count_table.query_2(
+            entity__eq=self.entity,
+            ts__gte=time_lower,
+            limit=60
+        )
+
+        cnt = 0
         for item in iterator:
-            logging.info("Row: {0}".format(item))
+            if int(item['ts']) > time_upper:
+                continue
+
+            if 'scale' in item:
+                scale = float(item['scale'])
+            else:
+                scale = 1.0
+
+            cnt += 1
             for key in item.keys():
-                if key == 'ts':
+                if key == 'entity' or key == 'ts':
                     continue
-                name = self.prefix + '-' + key if not self.prefix is None else key
+                if self.is_region:
+                    if len(key) < 3:
+                        name = self.prefix + '-' + key
+                    elif key.startswith(self.prefix):
+                        name = key
+                    else:
+                        continue
+                else:
+                    name = key
                 if not name in self.countries:
                     continue
-                data["countries"][name] = 1.0 * float(item[key])
-        maxval = 1000000
-        for country in data["countries"].keys():
-            if country == 'US':
-                maxval= data["countries"][country] / self.countries_by_pop[country]
+                data["countries"][name] = scale * float(item[key])
 
-        for country in data["countries"].keys():
-            if country in self.countries_by_pop:
-                data["countries"][country] = data["countries"][country] / self.countries_by_pop[country]
-                if data["countries"][country] > maxval:
-                    data["countries"][country] = maxval
+        logging.info("Fetched data over {0} to {1} total {2}".format(time_lower, time_upper, cnt))
+
+        return data
+
+class DynamoDBLatLongGetter:
+    def __init__(self):
+        pass
+
+    def getData(self, time):
+        data = {
+            "latlongs": {},
+        }
+
+        time_lower = time * 60000
+        time_upper = (time + 1) * 60000
+        logging.info("Fetching latlongs over {0} to {1}".format(time_lower, time_upper))
+        iterator = count_table.query_2(
+            entity__eq="L",
+            ts__gte=time_lower,
+            limit=60
+        )
+
+        cnt = 0
+        for item in iterator:
+            if int(item['ts']) > time_upper:
+                continue
+
+            if 'scale' in item:
+                scale = float(item['scale'])
             else:
-                data["countries"][country] = 0
+                scale = 1.0
+
+            cnt += 1
+            for key in item.keys():
+                if key == 'entity' or key == 'ts':
+                    continue
+                data["latlongs"][key] = scale * float(item[key])
+
+        logging.info("Fetched latlongs over {0} to {1} total {2}".format(time_lower, time_upper, cnt))
 
         return data
 
 if 'dynamodb' in os.environ:
     getters = {
-        "world": DynamoDBDataGetter("world.txt", countries_table),
-        "US": DynamoDBDataGetter("US.txt", states_table, prefix='US')
+        "world": DynamoDBDataGetter("world.txt", 'C'),
+        "US": DynamoDBDataGetter("US.txt", 'S', prefix='US', is_region=True)
     }
+    latLongGetter = DynamoDBLatLongGetter()
 else:
     getters = {
         "world": DataGetter("world.txt"),
         "US": DataGetter("US.txt")
     }
+    latLongGetter = None
 
 def getGetter(mapName):
     if not mapName in getters.keys():
@@ -123,8 +164,22 @@ def getBetween(mapName, time1, time2):
         return Response(json.dumps(data), mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
+
+@app.route("/latlongs/<mapName>/<int:time1>/<int:time2>")
+def getLatLongsBetween(mapName, time1, time2):
+    if latLongGetter is None:
+        return Response(status=404)
+    try:
+        data = {}
+        for i in xrange(time1, time2):
+            data[i] = latLongGetter.getData(i)
+        return Response(json.dumps(data), mimetype="application/json")
+    except ValueError, e:
+        return "%s" % e, 400
+
 def getFlaskApp():
     return app
+
 def begin():
     app.debug = True
     app.run(host="0.0.0.0")
