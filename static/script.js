@@ -131,32 +131,6 @@ function displayTime(time) {
                 addPulsyThingy(elm.lat, elm.lng, percentage);
             }
         });
-        // var largest = {amt: -1};
-        // pulsyThingies.forEach(function(elm) {
-        //     if(elm.amt > largest.amt) {
-        //         largest = elm;
-        //     }
-        // });
-        // if(largest.amt == -1) {
-        //     alert("no hotspots");
-        // }
-        // var buckets = [0, 0.2, 0.4, 0.6, 0.8];
-        // for(var key in buckets) {
-        //     buckets[key] *= largest.amt;
-        // }
-        // var bucketValues = {};
-        // for(var key in buckets) {
-        //     bucketValues[key] = [];
-        // }
-        // pulsyThingies.forEach(function(elm) {
-        //     var toAddTo = null;
-        //     for(var key in buckets) {
-        //         if(key < elm.amt) {
-        //             toAddTo = buckets[key];
-        //         }
-        //     }
-        //     toAddTo.push(elm);
-        // });
     });
 }
 var heldClickables = {};
@@ -299,7 +273,6 @@ function reload() {
         zoomMax: 1,
         onRegionTipShow: function(e, tip, code) {
             $("#traffic").html(data[code] * (divByPop ? maps[mapname]["pop"][code] : 1));
-            $("#traffic-units").html(data[code] / (!divByPop ? maps[mapname]["pop"][code] : 1));
             $("#info-title").html(tip.html());
             $("#population").html(maps[mapname]["pop"][code]);
             $("#info").show();
@@ -371,3 +344,4 @@ function updatePulsyThingies() {
 function removePulsyThingies() {
     $(".latlng").remove();
 }
+$("#type-selector").hide();
