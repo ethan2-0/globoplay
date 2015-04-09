@@ -151,30 +151,30 @@
     height: 15px;
     animation-duration: 2.5s;
     -webkit-animation-duration: 2.5s;
-    transform: translate(-7px, -7px);
-    -webkit-transform: translate(-7px, -7px);
+    /*transform: translate(-7px, -7px);*/
+    /*-webkit-transform: translate(-7px, -7px);*/
 }
 .latlng-t4 {
     width: 11px;
     height: 11px;
     animation-duration: 3.2s;
     -webkit-animation-duration: 3.2s;
-    transform: translate(6px, 6px);
-    -webkit-transform: translate(6px, 6px);
+    /*transform: translate(6px, 6px);*/
+    /*-webkit-transform: translate(6px, 6px);*/
 }
 .latlng-t3 {
     width: 9px;
     height: 9px;
     animation-duration: 3.8s;
     -webkit-animation-duration: 3.8s;
-    transform: translate(-4px, -4px);
-    -webkit-transform: translate(-4px, -4px);
+    /*transform: translate(-4px, -4px);*/
+    /*-webkit-transform: translate(-4px, -4px);*/
 }
 .latlng-t2 {
     width: 6px;
     height: 6px;
     animation-duration: 4.5s;
     -webkit-animation-duration: 4.5s;
-    transform: translate(-3px, -3px);
-    -webkit-transform: translate(-3px, -3px);
+    /*transform: translate(-3px, -3px);*/
+    /*-webkit-transform: translate(-3px, -3px);*/
 }
