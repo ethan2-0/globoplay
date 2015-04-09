@@ -21,13 +21,9 @@ if 'dynamodb' in os.environ:
                       connection=ddb_conn)
 
 class DataGetter:
-    countries = "This will be populated in the 'with' statement in __init__."
-    cities = "Same thing for cities."
     def __init__(self, mapfile):
         with open("maps/%s" % mapfile) as f:
             self.countries = [x.replace("\n", "").replace("\r", "") for x in f.readlines()]
-        with open("cities/%s" % mapfile) as f:
-            self.cities = [x.replace("\n", "").replace("\r", "") for x in f.readlines()]
     def getData(self, time):
         data = {
             "countries": {},
@@ -35,13 +31,9 @@ class DataGetter:
         }
         for country in self.countries:
             data["countries"][country] = random.randrange(1000)
-        for city in self.cities:
-            data["cities"][city] = random.randrange(100)
         return data
 
 class DynamoDBDataGetter:
-    countries = "This will be populated in the 'with' statement in __init__."
-    cities = "Same thing for cities."
     def __init__(self, mapfile, entity, prefix=None):
         self.entity = entity
         self.prefix = prefix
@@ -49,8 +41,6 @@ class DynamoDBDataGetter:
             self.countries = {}
             for x in f.read().splitlines():
                 self.countries[x] = 1.0
-        with open("cities/%s" % mapfile) as f:
-            self.cities = [x.replace("\n", "").replace("\r", "") for x in f.readlines()]
 
     def getData(self, time):
         logging.info("get {1} data for time {0}".format(time, self.entity))
@@ -74,6 +64,12 @@ class DynamoDBDataGetter:
         for item in iterator:
             if int(item['ts']) > time_upper:
                 continue
+
+            if 'scale' in item:
+                scale = float(item['scale'])
+            else:
+                scale = 1.0
+
             cnt += 1
             for key in item.keys():
                 if key == 'entity' or key == 'ts':
@@ -81,9 +77,47 @@ class DynamoDBDataGetter:
                 name = self.prefix + '-' + key if not self.prefix is None else key
                 if not name in self.countries:
                     continue
-                data["countries"][name] = 1.0 * float(item[key])
+                data["countries"][name] = scale * float(item[key])
 
         logging.info("Fetched data over {0} to {1} total {2}".format(time_lower, time_upper, cnt))
+
+        return data
+
+class DynamoDBLatLongGetter:
+    def __init__(self):
+        pass
+
+    def getData(self, time):
+        data = {
+            "latlongs": {},
+        }
+
+        time_lower = time * 60000
+        time_upper = (time + 1) * 60000
+        logging.info("Fetching latlongs over {0} to {1}".format(time_lower, time_upper))
+        iterator = count_table.query_2(
+            entity__eq="L",
+            ts__gte=time_lower,
+            limit=60
+        )
+
+        cnt = 0
+        for item in iterator:
+            if int(item['ts']) > time_upper:
+                continue
+
+            if 'scale' in item:
+                scale = float(item['scale'])
+            else:
+                scale = 1.0
+
+            cnt += 1
+            for key in item.keys():
+                if key == 'entity' or key == 'ts':
+                    continue
+                data["latlongs"][key] = scale * float(item[key])
+
+        logging.info("Fetched latlongs over {0} to {1} total {2}".format(time_lower, time_upper, cnt))
 
         return data
 
@@ -92,11 +126,13 @@ if 'dynamodb' in os.environ:
         "world": DynamoDBDataGetter("world.txt", 'C'),
         "US": DynamoDBDataGetter("US.txt", 'S', prefix='US')
     }
+    latLongGetter = DynamoDBLatLongGetter()
 else:
     getters = {
         "world": DataGetter("world.txt"),
         "US": DataGetter("US.txt")
     }
+    latLongGetter = None
 
 def getGetter(mapName):
     if not mapName in getters.keys():
@@ -116,6 +152,18 @@ def getBetween(mapName, time1, time2):
         data = {}
         for i in xrange(time1, time2):
             data[i] = getGetter(mapName).getData(i)
+        return Response(json.dumps(data), mimetype="application/json")
+    except ValueError, e:
+        return "%s" % e, 400
+
+@app.route("/latlongs/<mapName>/<int:time1>/<int:time2>")
+def getLatLongsBetween(mapName, time1, time2):
+    if latLongGetter is None:
+        return Response(status=404)
+    try:
+        data = {}
+        for i in xrange(time1, time2):
+            data[i] = latLongGetter.getData(i)
         return Response(json.dumps(data), mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
