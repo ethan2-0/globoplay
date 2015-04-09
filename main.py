@@ -45,12 +45,9 @@ class DynamoDBDataGetter:
 
     def getData(self, time):
         logging.info("get {1} data for time {0}".format(time, self.entity))
-        data = {
-            "countries": {},
-            "cities": {}
-        }
+        countries = {}
         for country in self.countries:
-            data["countries"][country] = 0
+            countries[country] = 0
 
         time_lower = time * 60000
         time_upper = (time + 1) * 60000
@@ -86,9 +83,17 @@ class DynamoDBDataGetter:
                     name = key
                 if not name in self.countries:
                     continue
-                data["countries"][name] = scale * float(item[key])
+                if name in countries:
+                    countries[name] += scale * float(item[key])
+                else:
+                    countries[name] = scale * float(item[key])
 
         logging.info("Fetched data over {0} to {1} total {2}".format(time_lower, time_upper, cnt))
+
+        data = {
+            "countries": countries,
+            "cities": {}
+        }
 
         return data
 
@@ -96,11 +101,7 @@ class DynamoDBLatLongGetter:
     def __init__(self):
         pass
 
-    def getData(self, time):
-        data = {
-            "latlongs": {},
-        }
-
+    def getData(self, time, limit=50):
         time_lower = time * 60000
         time_upper = (time + 1) * 60000
         logging.info("Fetching latlongs over {0} to {1}".format(time_lower, time_upper))
@@ -111,6 +112,7 @@ class DynamoDBLatLongGetter:
         )
 
         cnt = 0
+        latlongs = {}
         for item in iterator:
             if int(item['ts']) > time_upper:
                 continue
@@ -124,9 +126,25 @@ class DynamoDBLatLongGetter:
             for key in item.keys():
                 if key == 'entity' or key == 'ts':
                     continue
-                data["latlongs"][key] = scale * float(item[key])
+                if key in latlongs:
+                    latlongs[key] += scale * float(item[key])
+                else:
+                    latlongs[key] = scale * float(item[key])
+
+        srt = sorted(latlongs.values(), reverse=True)
+        if len(srt) > limit:
+            trim_val = srt[limit]
+            new_latlongs = {}
+            for key in latlongs.keys():
+                if latlongs[key] > trim_val:
+                    new_latlongs[key] = latlongs[key]
+            latlongs = new_latlongs
 
         logging.info("Fetched latlongs over {0} to {1} total {2}".format(time_lower, time_upper, cnt))
+
+        data = {
+            "latlongs": latlongs
+        }
 
         return data
 
