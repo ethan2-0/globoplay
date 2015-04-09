@@ -260,3 +260,8 @@ function updateNorm() {
     normFunc = $("#normSelect")[0].selectedIndex;
     reload();
 }
+$(function() {
+    setTimeout(function() {
+        $("#info").hide();
+    }, 1000);
+});
