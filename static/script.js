@@ -77,9 +77,15 @@ function displayTime(time) {
             body = JSON.parse(body);
             mapData = body;
             data = body["countries"];
-            if(!divByPop) {
+            if(divByPop) {
                 for(var index in data) {
-                    data[index] *= maps[mapname]["pop"][index];
+                    if(maps[mapname]["pop"][index] == 0) {
+                        alert("whoops");
+                    }
+                    if(typeof maps[mapname]["pop"][index] == "undefined") {
+                        maps[mapname]["pop"][index] = 1;
+                    }
+                    data[index] /= maps[mapname]["pop"][index];
                 }
             }
             setTimeout(function() {
@@ -94,6 +100,63 @@ function displayTime(time) {
             console.log(e);
             console.log(body);
         }
+    });
+    fetch("/latlong/" + mapname + "/" + time).then(function(response) {
+        return response.text();
+    }).then(function(body) {
+        removePulsyThingies();
+        body = JSON.parse(body)["latlongs"];
+        var pulsyThingies = [];
+        for(var key in body) {
+            var parts = key.split(",");
+            var lat = parseInt(parts[0]) / 1000 - 180;
+            var lng = parseInt(parts[1]) / 1000 - 180;
+            pulsyThingies.push({
+                lat: lat,
+                lng: lng,
+                amt: body[key]
+            });
+            // addPulsyThingy(lat, lng, 5);
+        }
+        console.log(pulsyThingies);
+        var largest = {amt: -1};
+        pulsyThingies.forEach(function(elm) {
+            largest = largest.amt > elm.amt ? largest : elm;
+        });
+        pulsyThingies.forEach(function(elm) {
+            var percentage = elm.amt / largest.amt;
+            percentage *= 5;
+            percentage = Math.round(percentage);
+            if(percentage >= 2) {
+                addPulsyThingy(elm.lat, elm.lng, percentage);
+            }
+        });
+        // var largest = {amt: -1};
+        // pulsyThingies.forEach(function(elm) {
+        //     if(elm.amt > largest.amt) {
+        //         largest = elm;
+        //     }
+        // });
+        // if(largest.amt == -1) {
+        //     alert("no hotspots");
+        // }
+        // var buckets = [0, 0.2, 0.4, 0.6, 0.8];
+        // for(var key in buckets) {
+        //     buckets[key] *= largest.amt;
+        // }
+        // var bucketValues = {};
+        // for(var key in buckets) {
+        //     bucketValues[key] = [];
+        // }
+        // pulsyThingies.forEach(function(elm) {
+        //     var toAddTo = null;
+        //     for(var key in buckets) {
+        //         if(key < elm.amt) {
+        //             toAddTo = buckets[key];
+        //         }
+        //     }
+        //     toAddTo.push(elm);
+        // });
     });
 }
 var heldClickables = {};
@@ -192,6 +255,7 @@ function updateCities() {
 }
 $(window).on("resize", function() {
     updateCities();
+    updatePulsyThingies();
 });
 $(function() {
     setTimeout(function() {
@@ -281,4 +345,29 @@ function updateDivByPop() {
 }
 function reloadCurrentTime() {
     displayTime(time);
+}
+
+
+
+
+
+function addPulsyThingy(lat, lng, tier) {
+    var pt = latLngToPt(lat, lng);
+    var elm = $("<div>").addClass("latlng latlng-t" + tier)
+        .css("left", pt.x)
+        .css("top", pt.y)
+        .appendTo($("#lat-lng-layer"))
+        .attr("data-lat", lat)
+        .attr("data-lng", lng);
+}
+function updatePulsyThingies() {
+    $(".latlng").each(function() {
+        var lat = parseFloat($(this).attr("data-lat"));
+        var lng = parseFloat($(this).attr("data-lng"));
+        var pt = latLngToPt(lat, lng);
+        $(this).css("left", pt.x).css("top", pt.y);
+    });
+}
+function removePulsyThingies() {
+    $(".latlng").remove();
 }

@@ -104,3 +104,51 @@
     text-decoration: underline;
     cursor: pointer;
 }
+#lat-lng-layer {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 1100000000;
+}
+@keyframes latlng {
+    from {
+        opacity: 0.8;
+        filter: blur(2px);
+    } 50% {
+        opacity: 0.3;
+        filter: blur(4px);
+    } to {
+        filter: blur(2px);
+        opacity: 0.8;
+    }
+}
+.latlng {
+    background-color: red;
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    opacity: 0.5;
+    animation-name: latlng;
+    animation-iteration-count: infinite;
+    border-radius: 50%;
+}
+.latlng-t5 {
+    width: 15px;
+    height: 15px;
+    animation-duration: 2.5s;
+}
+.latlng-t4 {
+    width: 11px;
+    height: 11px;
+    animation-duration: 3.2s;
+}
+.latlng-t3 {
+    width: 9px;
+    height: 9px;
+    animation-duration: 3.8s;
+}
+.latlng-t2 {
+    width: 6px;
+    height: 6px;
+    animation-duration: 4.5s;
+}

@@ -16,8 +16,11 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
 exampleHotspotData = ""
-with open("static/hotspot.json") as f:
-    exampleHotspotData = "".join(f.readlines())
+try:
+    with open("static/hotspot.json") as f:
+        exampleHotspotData = "".join(f.readlines())
+except:
+    exampleHotspotData = {}
 
 if 'dynamodb' in os.environ:
     ddb_conn = dynamodb2.connect_to_region(os.environ['aws_region'])
