@@ -127,7 +127,7 @@ function displayTime(time) {
             var percentage = elm.amt / largest.amt;
             percentage *= 5;
             percentage = Math.round(percentage);
-            if(percentage >= 4) {
+            if(percentage >= 10) {
                 console.log("Position (" + elm.lat + "," + elm.lng + ")")
                 addPulsyThingy(elm.lat, elm.lng, percentage);
             }
