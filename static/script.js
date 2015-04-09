@@ -114,7 +114,7 @@ function displayTime(time) {
             pulsyThingies.push({
                 lat: lat,
                 lng: lng,
-                amt: body[key]
+                amt: body[key] < 1 ? 0 : Math.log(body[key])
             });
             // addPulsyThingy(lat, lng, 5);
         }
