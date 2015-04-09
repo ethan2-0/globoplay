@@ -234,8 +234,10 @@ function reload() {
         },
         zoomMax: 1,
         onRegionTipShow: function(e, tip, code) {
-            $("#traffic").html(data[code]);
+            $("#traffic").html(data[code] * (divByPop ? maps[mapname]["pop"][code] : 1));
+            $("#traffic-units").html(data[code] / (!divByPop ? maps[mapname]["pop"][code] : 1));
             $("#info-title").html(tip.html());
+            $("#population").html(maps[mapname]["pop"][code]);
             $("#info").show();
         },
         onRegionOut: function() {
