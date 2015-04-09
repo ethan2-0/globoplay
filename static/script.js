@@ -64,6 +64,8 @@ var lastMouseMove = null;
 function updateTimeDisplay() {
     $("#display-time").html(prettyPrintMinutestamp(time));
 }
+var mapData = null;
+var divByPop = true;
 function displayTime(time) {
     //Update time display
     updateTimeDisplay();
@@ -73,7 +75,13 @@ function displayTime(time) {
     }).then(function(body) {
         try {
             body = JSON.parse(body);
+            mapData = body;
             data = body["countries"];
+            if(!divByPop) {
+                for(var index in data) {
+                    data[index] *= maps[mapname]["pop"][index];
+                }
+            }
             setTimeout(function() {
                 for(var city in body["cities"]) {
                     updateCity(city, {
@@ -226,8 +234,10 @@ function reload() {
         },
         zoomMax: 1,
         onRegionTipShow: function(e, tip, code) {
-            $("#traffic").html(data[code]);
+            $("#traffic").html(data[code] * (divByPop ? maps[mapname]["pop"][code] : 1));
+            $("#traffic-units").html(data[code] / (!divByPop ? maps[mapname]["pop"][code] : 1));
             $("#info-title").html(tip.html());
+            $("#population").html(maps[mapname]["pop"][code]);
             $("#info").show();
         },
         onRegionOut: function() {
@@ -259,4 +269,11 @@ updateSpeedInterval();
 function updateNorm() {
     normFunc = $("#normSelect")[0].selectedIndex;
     reload();
+}
+function updateDivByPop() {
+    divByPop = $("#divByPopCheckbox")[0].checked;
+    reloadCurrentTime();
+}
+function reloadCurrentTime() {
+    displayTime(time);
 }

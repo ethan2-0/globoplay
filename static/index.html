@@ -28,7 +28,8 @@
                 <option>Polynomial</option>
                 <option>Linear</option>
                 <option>Logarithmic</option>
-            </select>
+            </select><br/>
+            Divide by population: <input type="checkbox" value="" id="divByPopCheckbox" onchange="updateDivByPop()" checked/>
         </div>
         <script type="text/javascript">
             $("#settings-dialog").dialog({
@@ -61,11 +62,15 @@
             <table>
                 <tr class="info-table">
                     <td>Population</td>
-                    <td>[Not yet]</td>
+                    <td id="population">[Not yet]</td>
                 </tr>
                 <tr class="info-table">
                     <td>Traffic</td>
                     <td id="traffic">100,000</td>
+                </tr>
+                <tr class="info-table">
+                    <td>Traffic Units</td>
+                    <td id="traffic-units">100,000</td>
                 </tr>
             </table>
         </div>

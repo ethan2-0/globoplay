@@ -45,11 +45,6 @@ class DynamoDBDataGetter:
     def __init__(self, mapfile, entity, prefix=None):
         self.entity = entity
         self.prefix = prefix
-        with open("maps/pop%s" % mapfile) as f:
-            self.countries_by_pop = {}
-            for kvp in [x.split(' ') for x in f.read().splitlines()]:
-                logging.info("kvp: {0} - {1}".format(kvp[0], kvp[1]))
-                self.countries_by_pop[kvp[0]] = float(kvp[1])
         with open("maps/%s" % mapfile) as f:
             self.countries = {}
             for x in f.read().splitlines():
@@ -77,39 +72,18 @@ class DynamoDBDataGetter:
 
         cnt = 0
         for item in iterator:
+            if int(item['ts']) > time_upper:
+                continue
             cnt += 1
             for key in item.keys():
-                if key == 'entity':
-                    continue
-                if key == 'ts':
-                    if int(item[key]) > time_upper:
-                        break
+                if key == 'entity' or key == 'ts':
                     continue
                 name = self.prefix + '-' + key if not self.prefix is None else key
                 if not name in self.countries:
                     continue
-                if name in data["countries"]:
-                    data["countries"][name] += 100000.0 * float(item[key])
-                else:
-                    data["countries"][name] = 100000.0 * float(item[key])
+                data["countries"][name] = 1.0 * float(item[key])
 
         logging.info("Fetched data over {0} to {1} total {2}".format(time_lower, time_upper, cnt))
-
-        maxval = 1000000
-        for country in data["countries"].keys():
-            if country == 'US':
-                maxval = data["countries"][country] / self.countries_by_pop[country]
-
-        logging.info("Max val {0}".format(maxval))
-        for country in data["countries"].keys():
-            if country in self.countries_by_pop:
-                data["countries"][country] = data["countries"][country] / self.countries_by_pop[country]
-                if data["countries"][country] > maxval:
-                    data["countries"][country] = maxval
-            else:
-                data["countries"][country] = 0
-
-        logging.info("Returning")
 
         return data
 
