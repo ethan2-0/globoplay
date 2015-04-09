@@ -182,7 +182,7 @@ def getLatLongs(mapName, time):
     if latLongGetter is None:
         return Response(status=404)
     try:
-        data = {} = latLongGetter.getData(time)
+        data = latLongGetter.getData(time)
         return Response(json.dumps(data), mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
