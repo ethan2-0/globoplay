@@ -89,7 +89,7 @@ class DynamoDBDataGetter:
                 else:
                     data["countries"][name] = 100000.0 * float(item[key])
 
-        logging.info("Fetched data over {0} to {1} total {1}".format(time_lower, time_upper, cnt))
+        logging.info("Fetched data over {0} to {1} total {2}".format(time_lower, time_upper, cnt))
 
         maxval = 1000000
         for country in data["countries"].keys():
@@ -144,7 +144,7 @@ def getBetween(mapName, time1, time2):
 
 def getFlaskApp():
     return app
-    
+
 def begin():
     app.debug = True
     app.run(host="0.0.0.0")
