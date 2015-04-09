@@ -17,9 +17,7 @@ app = Flask(__name__)
 
 if 'dynamodb' in os.environ:
     ddb_conn = dynamodb2.connect_to_region(os.environ['aws_region'])
-    countries_table = Table(table_name=os.environ['countries_table'],
-                      connection=ddb_conn)
-    states_table = Table(table_name=os.environ['states_table'],
+    count_table = Table(table_name=os.environ['count_table'],
                       connection=ddb_conn)
 
 class DataGetter:
@@ -44,8 +42,8 @@ class DataGetter:
 class DynamoDBDataGetter:
     countries = "This will be populated in the 'with' statement in __init__."
     cities = "Same thing for cities."
-    def __init__(self, mapfile, table, prefix=None):
-        self.table = table
+    def __init__(self, mapfile, entity, prefix=None):
+        self.entity = entity
         self.prefix = prefix
         with open("maps/pop%s" % mapfile) as f:
             self.countries_by_pop = {}
@@ -60,27 +58,45 @@ class DynamoDBDataGetter:
             self.cities = [x.replace("\n", "").replace("\r", "") for x in f.readlines()]
 
     def getData(self, time):
+        logging.info("get {1} data for time {0}".format(time, self.entity))
         data = {
             "countries": {},
             "cities": {}
         }
         for country in self.countries:
             data["countries"][country] = 0
-        iterator = self.table.scan()
+
+        time_lower = time * 60000
+        time_upper = (time + 1) * 60000
+        logging.info("Fetching data over {0} to {1}".format(time_lower, time_upper))
+        iterator = count_table.query_2(
+            entity__eq=self.entity,
+            ts__gte=time_lower,
+            ts__lt=time_upper
+        )
+
+        cnt = 0
         for item in iterator:
-            logging.info("Row: {0}".format(item))
+            cnt += 1
             for key in item.keys():
-                if key == 'ts':
+                if key == 'ts' or key == 'entity':
                     continue
                 name = self.prefix + '-' + key if not self.prefix is None else key
                 if not name in self.countries:
                     continue
-                data["countries"][name] = 100000.0 * float(item[key])
+                if name in data["countries"]:
+                    data["countries"][name] += 100000.0 * float(item[key])
+                else:
+                    data["countries"][name] = 100000.0 * float(item[key])
+
+        logging.info("Fetched data over {0} to {1} total {1}".format(time_lower, time_upper, cnt))
+
         maxval = 1000000
         for country in data["countries"].keys():
             if country == 'US':
-                maxval= data["countries"][country] / self.countries_by_pop[country]
+                maxval = data["countries"][country] / self.countries_by_pop[country]
 
+        logging.info("Max val {0}".format(maxval))
         for country in data["countries"].keys():
             if country in self.countries_by_pop:
                 data["countries"][country] = data["countries"][country] / self.countries_by_pop[country]
@@ -89,12 +105,14 @@ class DynamoDBDataGetter:
             else:
                 data["countries"][country] = 0
 
+        logging.info("Returning")
+
         return data
 
 if 'dynamodb' in os.environ:
     getters = {
-        "world": DynamoDBDataGetter("world.txt", countries_table),
-        "US": DynamoDBDataGetter("US.txt", states_table, prefix='US')
+        "world": DynamoDBDataGetter("world.txt", 'C'),
+        "US": DynamoDBDataGetter("US.txt", 'S', prefix='US')
     }
 else:
     getters = {
@@ -123,8 +141,10 @@ def getBetween(mapName, time1, time2):
         return Response(json.dumps(data), mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
+
 def getFlaskApp():
     return app
+    
 def begin():
     app.debug = True
     app.run(host="0.0.0.0")
