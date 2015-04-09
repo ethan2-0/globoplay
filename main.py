@@ -165,7 +165,7 @@ def getBetween(mapName, time1, time2):
     except ValueError, e:
         return "%s" % e, 400
 
-@app.route("/latlongs/<mapName>/<int:time1>/<int:time2>")
+@app.route("/alllatlongs/<mapName>/<int:time1>/<int:time2>")
 def getLatLongsBetween(mapName, time1, time2):
     if latLongGetter is None:
         return Response(status=404)
@@ -173,6 +173,16 @@ def getLatLongsBetween(mapName, time1, time2):
         data = {}
         for i in xrange(time1, time2):
             data[i] = latLongGetter.getData(i)
+        return Response(json.dumps(data), mimetype="application/json")
+    except ValueError, e:
+        return "%s" % e, 400
+
+@app.route("/latlongs/<mapName>/<int:time>")
+def getLatLongs(mapName, time):
+    if latLongGetter is None:
+        return Response(status=404)
+    try:
+        data = {} = latLongGetter.getData(time)
         return Response(json.dumps(data), mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
