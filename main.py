@@ -118,9 +118,7 @@ class DynamoDBMaxCompletedTimestampGetter:
         )
 
         for item in iterator:
-            return {
-                "maxtimestamp": int(item['ts'])
-            }
+            return  int(item['ts'])
 
         return None
 
@@ -248,7 +246,7 @@ def getMaxCompletedTimestamp(mapName):
         data = maxTimestampGetter.getData(mapName)
         if data is None:
             return Response(404)
-        return Response(json.dumps(data), mimetype="application/json")
+        return Response(data, mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
 
