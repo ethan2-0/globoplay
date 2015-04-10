@@ -354,3 +354,13 @@ function removePulsyThingies() {
     $(".latlng").remove();
 }
 $("#type-selector").hide();
+
+
+$(".toggleable").each(function() {
+    $(this).on("click", function() {
+        $(this).toggleClass("toggled-on");
+        if($(this).attr("class").contains("toggled-on")) {
+            $(this).attr("toggled-time", +new Date);
+        }
+    });
+});
