@@ -11,7 +11,7 @@ from boto.dynamodb2.table import Table
 reload(sys)
 sys.setdefaultencoding("UTF-8")
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
@@ -242,6 +242,7 @@ def getLatLongs(mapName, time):
 
 @app.route("/maxtimestamp/<mapName>")
 def getMaxCompletedTimestamp(mapName):
+    logging.info("Calling maxtimestamp 1")
     if maxTimestampGetter is None:
         return Response(404)
     try:
