@@ -245,7 +245,7 @@ def getLatLongs(mapName, time):
 @app.route("/maxtimestamp/<mapName>")
 def getMaxCompletedTimestamp(mapName):
     if maxTimestampGetter is None:
-        return int(math.floor(time.time() / 60))
+        return "%s" % int(math.floor(time.time() / 60))
     try:
         data = maxTimestampGetter.getData(mapName)
         if data is None:
