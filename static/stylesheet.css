@@ -64,6 +64,7 @@
 }
 .city {
     opacity: 0;
+    display: none;
     position: absolute;
     width: 14px;
     height: 14px;
