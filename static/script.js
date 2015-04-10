@@ -160,18 +160,12 @@ $(".clickable").on("mousedown", function(evt) {
 });
 //back forward faster slower
 var clickableUpdates = 0;
+var lastAnimationDisabled = false;
 function updateClickables(forceUpdate) {
     if(typeof(forceUpdate) == "undefined") {
         forceUpdate = false;
     }
     clickableUpdates++;
-    // if(heldClickables["faster"] == true) {
-    //     speed += 3;
-    //     updateSpeedInterval();
-    // } else if(heldClickables["slower"] == true) {
-    //     speed -= 3;
-    //     updateSpeedInterval();
-    // }
     if(clickableUpdates % 3 == 0 || forceUpdate) {
         var originalTime = time;
         if(heldClickables["back"] == true) {
@@ -183,6 +177,14 @@ function updateClickables(forceUpdate) {
                 time = maxTimestamp;
             }
             updateTimeDisplay();
+        }
+        if(heldClickables["should-animate"] == true != lastAnimationDisabled) {
+            lastAnimationDisabled = heldClickables["should-animate"];
+            if(lastAnimationDisabled) {
+                $(".latlng").addClass("noanimate");
+            } else {
+                $(".latlng").removeClass("noanimate");
+            }
         }
         if(time < 0) {
             time = 0;
@@ -351,12 +353,18 @@ function reloadCurrentTime() {
 
 function addPulsyThingy(lat, lng, tier) {
     var pt = latLngToPt(lat, lng);
+    if(pt.x <= 20 && pt.y <= 20) {
+        return;
+    }
     var elm = $("<div>").addClass("latlng latlng-t" + tier)
         .css("left", pt.x)
         .css("top", pt.y)
         .appendTo($("#lat-lng-layer"))
         .attr("data-lat", lat)
         .attr("data-lng", lng);
+    if(lastAnimationDisabled) {
+        elm.addClass("noanimate");
+    }
 }
 function updatePulsyThingies() {
     $(".latlng").each(function() {
