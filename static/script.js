@@ -153,20 +153,20 @@ function updateClickables(forceUpdate) {
         forceUpdate = false;
     }
     clickableUpdates++;
-    if(heldClickables["faster"] == true) {
-        speed += 3;
-        updateSpeedInterval();
-    } else if(heldClickables["slower"] == true) {
-        speed -= 3;
-        updateSpeedInterval();
-    }
+    // if(heldClickables["faster"] == true) {
+    //     speed += 3;
+    //     updateSpeedInterval();
+    // } else if(heldClickables["slower"] == true) {
+    //     speed -= 3;
+    //     updateSpeedInterval();
+    // }
     if(clickableUpdates % 3 == 0 || forceUpdate) {
         var originalTime = time;
         if(heldClickables["back"] == true) {
-            time--;
+            time -= Math.ceil(Math.log((+new Date + 1) - parseInt($("#backward-clickable").attr("toggled-time"))) / 8);
             updateTimeDisplay();
         } else if(heldClickables["forward"] == true) {
-            time++;
+            time += Math.ceil(Math.log((+new Date + 1) - parseInt($("#forward-clickable").attr("toggled-time"))) / 8);
             updateTimeDisplay();
         }
         if(time < 0) {
@@ -357,10 +357,15 @@ $("#type-selector").hide();
 
 
 $(".toggleable").each(function() {
+    heldClickables[$(this).attr("data-name")] = false;
     $(this).on("click", function() {
         $(this).toggleClass("toggled-on");
         if($(this).attr("class").contains("toggled-on")) {
             $(this).attr("toggled-time", +new Date);
+            heldClickables[$(this).attr("data-name")] = true;
+        } else {
+            $(this).attr("toggled-time", "-1");
+            heldClickables[$(this).attr("data-name")] = false;
         }
     });
 });
