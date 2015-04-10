@@ -7,6 +7,7 @@ import os
 import sys
 from boto import dynamodb2
 from boto.dynamodb2.table import Table
+import time
 
 reload(sys)
 sys.setdefaultencoding("UTF-8")
@@ -243,7 +244,7 @@ def getLatLongs(mapName, time):
 @app.route("/maxtimestamp/<mapName>")
 def getMaxCompletedTimestamp(mapName):
     if maxTimestampGetter is None:
-        return Response(404)
+        return int(math.floor(time.time() / 60))
     try:
         data = maxTimestampGetter.getData(mapName)
         if data is None:
