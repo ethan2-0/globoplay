@@ -187,7 +187,7 @@ function dateToMinutestamp(date) {
     return Math.floor(+(date) / 1000 / 60)
 }
 function prettyPrintDate(date) {
-    return date.toLocaleString() + " local time [minutestamp " + dateToMinutestamp(date) + "]";
+    return date.toLocaleString();
 }
 function prettyPrintMinutestamp(time) {
     return prettyPrintDate(minutestampToDate(time));
