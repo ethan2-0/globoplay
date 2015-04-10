@@ -246,6 +246,8 @@ def getMaxCompletedTimestamp(mapName):
         return Response(404)
     try:
         data = maxTimestampGetter.getData(mapName)
+        if data is None:
+            return Response(404)
         return Response(json.dumps(data), mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
