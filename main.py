@@ -8,6 +8,7 @@ import sys
 from boto import dynamodb2
 from boto.dynamodb2.table import Table
 import time
+import math
 
 reload(sys)
 sys.setdefaultencoding("UTF-8")
