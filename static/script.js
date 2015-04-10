@@ -1,3 +1,4 @@
+population_scale = 1000000000
 $("#map-select").on("change", function() {
     location.href = "index.html?map=" + $("#map-select")[0].selectedIndex;
 });
@@ -85,6 +86,7 @@ function displayTime(time) {
                     if(typeof maps[mapname]["pop"][index] == "undefined") {
                         maps[mapname]["pop"][index] = 1;
                     }
+                    data[index] *= population_scale
                     data[index] /= maps[mapname]["pop"][index];
                 }
             }
@@ -273,7 +275,13 @@ function reload() {
         },
         zoomMax: 1,
         onRegionTipShow: function(e, tip, code) {
-            $("#traffic").html(Math.round(data[code] * (divByPop ? maps[mapname]["pop"][code] : 1)));
+            value = data[code]
+            if (divByPop) {
+                value *= maps[mapname]["pop"][code]
+                value /= population_scale
+                value = Math.round(value)
+            }
+            $("#traffic").html(value);
             $("#info-title").html(tip.html());
             $("#population").html(maps[mapname]["pop"][code]);
             $("#info").show();

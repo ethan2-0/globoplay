@@ -1256,7 +1256,6 @@ jvm.NumericScale.prototype = {
       }
     } else if(f === 'log') {
       this.normalize = function(value) {
-        console.log("normalize " + value + ": " + (value < 1 ? 0 : Math.log(value)))
         return value < 1 ? 0 : Math.log(value)
       }
     } else if (f === 'linear') {
