@@ -112,7 +112,7 @@ class DynamoDBMaxCompletedTimestampGetter:
         logging.info("get max time for {0}".format(entity))
 
         iterator = count_table.query_2(
-            entity__eq=entity,
+            entity__eq="C",
             reverse=True,
             limit=1
         )
@@ -242,7 +242,6 @@ def getLatLongs(mapName, time):
 
 @app.route("/maxtimestamp/<mapName>")
 def getMaxCompletedTimestamp(mapName):
-    logging.info("Calling maxtimestamp 1")
     if maxTimestampGetter is None:
         return Response(404)
     try:
