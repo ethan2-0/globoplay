@@ -67,13 +67,17 @@ function updateTimeDisplay() {
 }
 var mapData = null;
 var divByPop = true;
-function displayTime(time) {
+function displayTime(timeThen) {
+    time = timeThen;
     //Update time display
     updateTimeDisplay();
     //Get the data
-    fetch("/get/" + mapname + "/" + time).then(function(response) {
+    fetch("/get/" + mapname + "/" + timeThen).then(function(response) {
         return response.text();
     }).then(function(body) {
+        if(time != timeThen) {
+            return;
+        }
         try {
             body = JSON.parse(body);
             mapData = body;
@@ -103,9 +107,12 @@ function displayTime(time) {
             console.log(body);
         }
     });
-    fetch("/latlong/" + mapname + "/" + time).then(function(response) {
+    fetch("/latlong/" + mapname + "/" + timeThen).then(function(response) {
         return response.text();
     }).then(function(body) {
+        if(time != timeThen) {
+            return;
+        }
         removePulsyThingies();
         body = JSON.parse(body)["latlongs"];
         var pulsyThingies = [];
@@ -135,6 +142,11 @@ function displayTime(time) {
             }
         });
     });
+    fetch("/maxtimestamp/" + mapname).then(function(response) {
+        return response.text();
+    }).then(function(body) {
+        maxTimestamp = parseInt(body);
+    })
 }
 var heldClickables = {};
 $(".clickable").on("mousedown", function(evt) {
@@ -167,6 +179,9 @@ function updateClickables(forceUpdate) {
             updateTimeDisplay();
         } else if(heldClickables["forward"] == true) {
             time += Math.ceil(Math.log((+new Date + 1) - parseInt($("#forward-clickable").attr("toggled-time"))) / 8);
+            if(time > maxTimestamp) {
+                time = maxTimestamp;
+            }
             updateTimeDisplay();
         }
         if(time < 0) {
@@ -196,6 +211,7 @@ function latLngToPt(lat, lng) {
     return mapObj.latLngToPoint(lat, lng);
 }
 var cities = {};
+var maxTimestamp = 0;
 function updateCity(name, params) {
     if(typeof cities[name] == "undefined") {
         cities[name] = {};
@@ -369,3 +385,6 @@ $(".toggleable").each(function() {
         }
     });
 });
+$("#most-recent-btn").on("click", function() {
+    displayTime(maxTimestamp);
+})
