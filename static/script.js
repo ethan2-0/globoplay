@@ -353,6 +353,9 @@ function reloadCurrentTime() {
 
 function addPulsyThingy(lat, lng, tier) {
     var pt = latLngToPt(lat, lng);
+    if(pt == false || typeof pt != "object") {
+        return;
+    }
     if(pt.x <= 20 && pt.y <= 20) {
         return;
     }
