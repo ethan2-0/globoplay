@@ -39,10 +39,6 @@
             $("#normSelect")[0].selectedIndex = 0;
         </script>
         <div id="controls">
-            <center>
-                <span class="glyphicon clickable glyphicon-backward" data-name="back"></span>
-                <span class="glyphicon clickable glyphicon-forward" data-name="forward"></span>
-            </center>
             <div id="map-selector">
                 <select id="map-select"></select>
             </div>
@@ -50,12 +46,19 @@
                 <input type="radio" name="mapview" value="Cities" id="city-mapmode" class="mapmode-selector"/> Cities<br/>
                 <input type="radio" name="mapview" value="Political" id="political-mapmode" class="mapmode-selector" checked/> Countries
             </div>
-            <center>
-                <span class="link" id="settings-button" onclick="$('#settings-dialog').dialog('open')">Settings</span>
-                <span id="speed">60</span>
-                <span class="glyphicon clickable glyphicon-plus-sign" data-name="faster"></span>
-                <span class="glyphicon clickable glyphicon-minus-sign" data-name="slower"></span>
-            </center>
+            <div id="main-controls">
+                <center>
+                    <span id="backward-clickable" class="glyphicon toggleable glyphicon-backward" data-name="back" title="Backward"></span>
+                    <span id="forward-clickable" class="glyphicon toggleable glyphicon-forward" data-name="forward" title="Forward"></span>
+                    <span class="glyphicon glyphicon-step-forward pointer" id="most-recent-btn" title="Most recent data"></span>
+                    <br/>
+                    <span class="link" id="settings-button" onclick="$('#settings-dialog').dialog('open')">Settings</span> |
+                    <span class="toggleable pointer" data-name="should-animate">Disable animation</span>
+                    <!-- <span id="speed">60</span>
+                    <span class="glyphicon clickable glyphicon-plus-sign" data-name="faster"></span>
+                    <span class="glyphicon clickable glyphicon-minus-sign" data-name="slower"></span> -->
+                </center>
+            </div>
         </div>
         <div id="info">
             <div id="info-title">...</div>

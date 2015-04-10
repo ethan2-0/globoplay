@@ -64,6 +64,7 @@
 }
 .city {
     opacity: 0;
+    display: none;
     position: absolute;
     width: 14px;
     height: 14px;
@@ -178,4 +179,25 @@
     -webkit-animation-duration: 4.5s;
     /*transform: translate(-3px, -3px);*/
     /*-webkit-transform: translate(-3px, -3px);*/
+}
+#main-controls {
+    margin-left: 40vw;
+    width: 20vw;
+    background-color: white;
+    box-shadow: 0px 0px 1px 1px #EEE;
+}
+.toggled-on {
+    background-color: black !important;
+    color: white !important;
+    border-radius: 4px;
+}
+.toggleable {
+    cursor: pointer;
+    padding: 2px;
+}
+.pointer {
+    cursor: pointer;
+}
+.noanimate {
+    animation: initial;
 }

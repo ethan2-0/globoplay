@@ -67,13 +67,17 @@ function updateTimeDisplay() {
 }
 var mapData = null;
 var divByPop = true;
-function displayTime(time) {
+function displayTime(timeThen) {
+    time = timeThen;
     //Update time display
     updateTimeDisplay();
     //Get the data
-    fetch("/get/" + mapname + "/" + time).then(function(response) {
+    fetch("/get/" + mapname + "/" + timeThen).then(function(response) {
         return response.text();
     }).then(function(body) {
+        if(time != timeThen) {
+            return;
+        }
         try {
             body = JSON.parse(body);
             mapData = body;
@@ -103,9 +107,12 @@ function displayTime(time) {
             console.log(body);
         }
     });
-    fetch("/latlong/" + mapname + "/" + time).then(function(response) {
+    fetch("/latlong/" + mapname + "/" + timeThen).then(function(response) {
         return response.text();
     }).then(function(body) {
+        if(time != timeThen) {
+            return;
+        }
         removePulsyThingies();
         body = JSON.parse(body)["latlongs"];
         var pulsyThingies = [];
@@ -130,11 +137,15 @@ function displayTime(time) {
             percentage *= 5;
             percentage = Math.round(percentage);
             if(percentage >= 2) {
-                console.log("Position (" + elm.lat + "," + elm.lng + ")")
                 addPulsyThingy(elm.lat, elm.lng, percentage);
             }
         });
     });
+    fetch("/maxtimestamp/" + mapname).then(function(response) {
+        return response.text();
+    }).then(function(body) {
+        maxTimestamp = parseInt(body);
+    })
 }
 var heldClickables = {};
 $(".clickable").on("mousedown", function(evt) {
@@ -148,26 +159,31 @@ $(".clickable").on("mousedown", function(evt) {
 });
 //back forward faster slower
 var clickableUpdates = 0;
+var lastAnimationDisabled = false;
 function updateClickables(forceUpdate) {
     if(typeof(forceUpdate) == "undefined") {
         forceUpdate = false;
     }
     clickableUpdates++;
-    if(heldClickables["faster"] == true) {
-        speed += 3;
-        updateSpeedInterval();
-    } else if(heldClickables["slower"] == true) {
-        speed -= 3;
-        updateSpeedInterval();
-    }
     if(clickableUpdates % 3 == 0 || forceUpdate) {
         var originalTime = time;
         if(heldClickables["back"] == true) {
-            time--;
+            time -= Math.ceil(Math.log((+new Date + 1) - parseInt($("#backward-clickable").attr("toggled-time"))) / 8);
             updateTimeDisplay();
         } else if(heldClickables["forward"] == true) {
-            time++;
+            time += Math.ceil(Math.log((+new Date + 1) - parseInt($("#forward-clickable").attr("toggled-time"))) / 8);
+            if(time > maxTimestamp) {
+                time = maxTimestamp;
+            }
             updateTimeDisplay();
+        }
+        if(heldClickables["should-animate"] == true != lastAnimationDisabled) {
+            lastAnimationDisabled = heldClickables["should-animate"];
+            if(lastAnimationDisabled) {
+                $(".latlng").addClass("noanimate");
+            } else {
+                $(".latlng").removeClass("noanimate");
+            }
         }
         if(time < 0) {
             time = 0;
@@ -196,6 +212,7 @@ function latLngToPt(lat, lng) {
     return mapObj.latLngToPoint(lat, lng);
 }
 var cities = {};
+var maxTimestamp = 0;
 function updateCity(name, params) {
     if(typeof cities[name] == "undefined") {
         cities[name] = {};
@@ -335,12 +352,21 @@ function reloadCurrentTime() {
 
 function addPulsyThingy(lat, lng, tier) {
     var pt = latLngToPt(lat, lng);
+    if(pt == false || typeof pt != "object") {
+        return;
+    }
+    if(pt.x <= 20 && pt.y <= 20) {
+        return;
+    }
     var elm = $("<div>").addClass("latlng latlng-t" + tier)
         .css("left", pt.x)
         .css("top", pt.y)
         .appendTo($("#lat-lng-layer"))
         .attr("data-lat", lat)
         .attr("data-lng", lng);
+    if(lastAnimationDisabled) {
+        elm.addClass("noanimate");
+    }
 }
 function updatePulsyThingies() {
     $(".latlng").each(function() {
@@ -354,3 +380,21 @@ function removePulsyThingies() {
     $(".latlng").remove();
 }
 $("#type-selector").hide();
+
+
+$(".toggleable").each(function() {
+    heldClickables[$(this).attr("data-name")] = false;
+    $(this).on("click", function() {
+        $(this).toggleClass("toggled-on");
+        if($(this).attr("class").contains("toggled-on")) {
+            $(this).attr("toggled-time", +new Date);
+            heldClickables[$(this).attr("data-name")] = true;
+        } else {
+            $(this).attr("toggled-time", "-1");
+            heldClickables[$(this).attr("data-name")] = false;
+        }
+    });
+});
+$("#most-recent-btn").on("click", function() {
+    displayTime(maxTimestamp);
+})
