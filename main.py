@@ -104,6 +104,26 @@ class DynamoDBDataGetter:
 
         return data
 
+class DynamoDBMaxCompletedTimestampGetter:
+    def __init__(self):
+        pass
+
+    def getData(self, entity):
+        logging.info("get max time for {0}".format(entity))
+
+        iterator = count_table.query_2(
+            entity__eq=entity,
+            reverse=True,
+            limit=1
+        )
+
+        for item in iterator:
+            return {
+                "maxtimestamp": int(item['ts'])
+            }
+
+        return None
+
 class DynamoDBLatLongGetter:
     def __init__(self):
         pass
@@ -161,12 +181,14 @@ if 'dynamodb' in os.environ:
         "US": DynamoDBDataGetter("US.txt", 'S', prefix='US', is_region=True)
     }
     latLongGetter = DynamoDBLatLongGetter()
+    maxTimestampGetter = DynamoDBMaxCompletedTimestampGetter()
 else:
     getters = {
         "world": DataGetter("world.txt"),
         "US": DataGetter("US.txt")
     }
     latLongGetter = None
+    maxTimestampGetter = None
 def getHotspotExample():
     return exampleHotspotData
 
@@ -214,6 +236,16 @@ def getLatLongs(mapName, time):
         return Response(getHotspotExample(), mimetype="application/json")
     try:
         data = latLongGetter.getData(time)
+        return Response(json.dumps(data), mimetype="application/json")
+    except ValueError, e:
+        return "%s" % e, 400
+
+@app.route("/maxtimestamp/<mapName>")
+def getMaxCompletedTimestamp(mapName):
+    if maxTimestampGetter is None:
+        return Response(404)
+    try:
+        data = maxTimestampGetter.getData(mapName)
         return Response(json.dumps(data), mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
