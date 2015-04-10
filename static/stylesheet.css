@@ -63,6 +63,7 @@
     bottom: 0px;
 }
 .city {
+    opacity: 0;
     position: absolute;
     width: 14px;
     height: 14px;
