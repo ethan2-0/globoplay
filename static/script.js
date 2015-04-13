@@ -71,7 +71,7 @@ function displayTime(timeThen) {
     fetch("/maxtimestamp/" + mapname).then(function(response) {
         return response.text();
     }).then(function(body) {
-        maxTimestamp = dateToMinutestamp(parseInt(body));
+        maxTimestamp = dateToMinutestamp(parseInt(body)) - 1;
     }).then(function() {
         time = timeThen;
         //Update time display
@@ -400,7 +400,7 @@ $("#most-recent-btn").on("click", function() {
     fetch("/maxtimestamp/" + mapname).then(function(response) {
         return response.text();
     }).then(function(body) {
-        maxTimestamp = dateToMinutestamp(parseInt(body));
+        maxTimestamp = dateToMinutestamp(parseInt(body)) - 1;
         displayTime(maxTimestamp);
     })
 })
