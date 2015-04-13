@@ -99,9 +99,6 @@
     margin-bottom: 2px;
     border-bottom: 1px solid #EEE;
 }
-#info-title:before {
-    content: "Info for ";
-}
 .link {
     text-decoration: underline;
     cursor: pointer;
