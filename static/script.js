@@ -68,83 +68,84 @@ function updateTimeDisplay() {
 var mapData = null;
 var divByPop = true;
 function displayTime(timeThen) {
-    time = timeThen;
-    //Update time display
-    updateTimeDisplay();
-    //Get the data
-    fetch("/get/" + mapname + "/" + timeThen).then(function(response) {
-        return response.text();
-    }).then(function(body) {
-        if(time != timeThen) {
-            return;
-        }
-        try {
-            body = JSON.parse(body);
-            mapData = body;
-            data = body["countries"];
-            if(divByPop) {
-                for(var index in data) {
-                    if(maps[mapname]["pop"][index] == 0) {
-                        alert("whoops");
-                    }
-                    if(typeof maps[mapname]["pop"][index] == "undefined") {
-                        maps[mapname]["pop"][index] = 1;
-                    }
-                    data[index] *= population_scale
-                    data[index] /= maps[mapname]["pop"][index];
-                }
-            }
-            setTimeout(function() {
-                for(var city in body["cities"]) {
-                    updateCity(city, {
-                        size: body["cities"][city]
-                    });
-                }
-            }, 102);
-            reload();
-        } catch(e) {
-            console.log(e);
-            console.log(body);
-        }
-    });
-    fetch("/latlong/" + mapname + "/" + timeThen).then(function(response) {
-        return response.text();
-    }).then(function(body) {
-        if(time != timeThen) {
-            return;
-        }
-        removePulsyThingies();
-        body = JSON.parse(body)["latlongs"];
-        var pulsyThingies = [];
-        for(var key in body) {
-            var parts = key.split(",");
-            var lat = parseInt(parts[0]) / 1000 - 180;
-            var lng = parseInt(parts[1]) / 1000 - 180;
-            pulsyThingies.push({
-                lat: lat,
-                lng: lng,
-                amt: body[key] < 1 ? 0 : Math.log(body[key])
-            });
-            // addPulsyThingy(lat, lng, 5);
-        }
-        console.log(pulsyThingies);
-        var largest = {amt: -1};
-        pulsyThingies.forEach(function(elm) {
-            largest = largest.amt > elm.amt ? largest : elm;
-        });
-        pulsyThingies.forEach(function(elm) {
-            var percentage = elm.amt / largest.amt;
-            percentage *= 5;
-            percentage = Math.round(percentage);
-            if(percentage >= 2) {
-                addPulsyThingy(elm.lat, elm.lng, percentage);
-            }
-        });
-    });
     fetch("/maxtimestamp/" + mapname).then(function(response) {
         return response.text();
     }).then(function(body) {
-        maxTimestamp = parseInt(body);
+        maxTimestamp = dateToMinutestamp(parseInt(body));
+    }).then(function() {
+        time = timeThen;
+        //Update time display
+        updateTimeDisplay();
+        //Get the data
+        fetch("/get/" + mapname + "/" + timeThen).then(function(response) {
+            return response.text();
+        }).then(function(body) {
+            if(time != timeThen) {
+                return;
+            }
+            try {
+                body = JSON.parse(body);
+                mapData = body;
+                data = body["countries"];
+                if(divByPop) {
+                    for(var index in data) {
+                        if(maps[mapname]["pop"][index] == 0) {
+                            alert("whoops");
+                        }
+                        if(typeof maps[mapname]["pop"][index] == "undefined") {
+                            maps[mapname]["pop"][index] = 1;
+                        }
+                        data[index] *= population_scale
+                        data[index] /= maps[mapname]["pop"][index];
+                    }
+                }
+                setTimeout(function() {
+                    for(var city in body["cities"]) {
+                        updateCity(city, {
+                            size: body["cities"][city]
+                        });
+                    }
+                }, 102);
+                reload();
+            } catch(e) {
+                console.log(e);
+                console.log(body);
+            }
+        });
+        fetch("/latlong/" + mapname + "/" + timeThen).then(function(response) {
+            return response.text();
+        }).then(function(body) {
+            if(time != timeThen) {
+                return;
+            }
+            removePulsyThingies();
+            body = JSON.parse(body)["latlongs"];
+            var pulsyThingies = [];
+            for(var key in body) {
+                var parts = key.split(",");
+                var lat = parseInt(parts[0]) / 1000 - 180;
+                var lng = parseInt(parts[1]) / 1000 - 180;
+                pulsyThingies.push({
+                    lat: lat,
+                    lng: lng,
+                    amt: body[key] < 1 ? 0 : Math.log(body[key])
+                });
+                // addPulsyThingy(lat, lng, 5);
+            }
+            console.log(pulsyThingies);
+            var largest = {amt: -1};
+            pulsyThingies.forEach(function(elm) {
+                largest = largest.amt > elm.amt ? largest : elm;
+            });
+            pulsyThingies.forEach(function(elm) {
+                var percentage = elm.amt / largest.amt;
+                percentage *= 5;
+                percentage = Math.round(percentage);
+                if(percentage >= 2) {
+                    addPulsyThingy(elm.lat, elm.lng, percentage);
+                }
+            });
+        });
     })
 }
 var heldClickables = {};
@@ -396,5 +397,10 @@ $(".toggleable").each(function() {
     });
 });
 $("#most-recent-btn").on("click", function() {
-    displayTime(maxTimestamp);
+    fetch("/maxtimestamp/" + mapname).then(function(response) {
+        return response.text();
+    }).then(function(body) {
+        maxTimestamp = dateToMinutestamp(parseInt(body));
+        displayTime(maxTimestamp);
+    })
 })
