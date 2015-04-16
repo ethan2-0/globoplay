@@ -73,6 +73,9 @@ function displayTime(timeThen) {
     }).then(function(body) {
         maxTimestamp = dateToMinutestamp(parseInt(body)) - 1;
     }).then(function() {
+        if (timeThen > maxTimestamp) {
+            timeThen = maxTimestamp
+        }
         time = timeThen;
         //Update time display
         updateTimeDisplay();
@@ -343,13 +346,10 @@ function updateDivByPop() {
     divByPop = $("#divByPopCheckbox")[0].checked;
     reloadCurrentTime();
 }
+
 function reloadCurrentTime() {
     displayTime(time);
 }
-
-
-
-
 
 function addPulsyThingy(lat, lng, tier) {
     var pt = latLngToPt(lat, lng);
