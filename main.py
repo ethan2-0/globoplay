@@ -201,6 +201,9 @@ def getGetter(mapName):
 @app.route("/get/<mapName>/<int:time>")
 def serveGet(mapName, time):
     try:
+        max_time = maxTimestampGetter.getData(mapName)
+        if max_time > time:
+            time = max_time
         return Response(json.dumps(getGetter(mapName).getData(time)), mimetype="application/json")
     except ValueError, e:
         return "%s" % e, 400
@@ -235,6 +238,9 @@ def getLatLongs(mapName, time):
     if latLongGetter is None:
         return Response(getHotspotExample(), mimetype="application/json")
     try:
+        max_time = maxTimestampGetter.getData(mapName)
+        if max_time > time:
+            time = max_time
         data = latLongGetter.getData(time)
         return Response(json.dumps(data), mimetype="application/json")
     except ValueError, e:
