@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <title>Active Users Visualization</title>
+        <!-- Bootstrap -->
+        <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css"/>
+        <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-theme.min.css"/>
+        <style type="text/css">
+            iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="width: 100vw; height: 50vh;">
+            <iframe src="index.html?map=0"></iframe>
+        </div>
+        <div style="width: 100vw; height: 50vh; border-top: 1px solid #EEE;">
+            <iframe src="index.html?map=1"></iframe>
+        </div>
+        <div style="position: absolute; bottom: 10px; right: 10px;">
+            <a href="multi_vert.html">Horizontal Divison</a>
+        </div>
+    </body>
+</html>
