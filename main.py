@@ -174,6 +174,11 @@ class DynamoDBLatLongGetter:
         }
 
         return data
+class RandomMaxCompletedTimestampGetter:
+    def __init__(self):
+        pass
+    def getData(self, notUsed):
+        return int(time.time())
 
 if 'dynamodb' in os.environ:
     getters = {
@@ -188,7 +193,7 @@ else:
         "US": DataGetter("US.txt")
     }
     latLongGetter = None
-    maxTimestampGetter = None
+    maxTimestampGetter = RandomMaxCompletedTimestampGetter()
 def getHotspotExample():
     return exampleHotspotData
 
